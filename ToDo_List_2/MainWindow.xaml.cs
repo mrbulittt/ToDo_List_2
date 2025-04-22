@@ -23,10 +23,11 @@ namespace ToDo_List_2
     public partial class MainWindow : Window
     {
         public ObservableCollection<ToDoItem> Tasks { get; set; } = new ObservableCollection<ToDoItem>();
+        public ObservableCollection<ToDoItem> FilteredTasks { get; set; } = new ObservableCollection<ToDoItem>();
         public MainWindow()
         {
             InitializeComponent();
-            TaskListLb.ItemsSource = Tasks;
+            TaskListLb.ItemsSource = FilteredTasks;
             UpdateCounter();
         }
 
@@ -34,9 +35,19 @@ namespace ToDo_List_2
         {
             if (!string.IsNullOrWhiteSpace(TaskInputTb.Text))
             {
-                Tasks.Add(new ToDoItem { Title = TaskInputTb.Text, IsDone = false });
+                var selectedCategory = (CategoryComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+                Tasks.Add(new ToDoItem 
+                { 
+                    Title = TaskInputTb.Text, 
+                    IsDone = false,  
+                    DueDate = DueDatePicker.SelectedDate,
+                    Category = selectedCategory   
+                });
                 TaskInputTb.Text = string.Empty;
+                DueDatePicker.SelectedDate = DateTime.Today;
+                CategoryComboBox.SelectedIndex = -1;
                 UpdateCounter();
+                ApplyFilter();
             }
         }
 
@@ -46,16 +57,19 @@ namespace ToDo_List_2
             {
                 Tasks.Remove(item);
                 UpdateCounter();
+                ApplyFilter();
             }
         }
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
             UpdateCounter();
+            ApplyFilter();
         }
 
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateCounter();
+            ApplyFilter();
         }
 
         public void UpdateCounter()
@@ -70,12 +84,51 @@ namespace ToDo_List_2
             }
             CounterTextTbl.Text = $"Осталось дел: {counter}";
         }
+
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        private void CategoryFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ApplyFilter();
+        }
+        private void ApplyFilter()
+        {
+            var  searchText = SearchTextBox.Text.ToLower();
+            var selectedCategory = (CategoryFilterComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString();
+
+            //Поиск по загаловку
+
+            var filteredByTitle = Tasks.Where(task => task.Title != null && task.Title.Contains(searchText)).ToList();
+
+            //Фильтрация по категории
+
+            List<ToDoItem> finalFiltered;
+            if(string .IsNullOrEmpty(selectedCategory) || selectedCategory == "Все")
+            {
+                finalFiltered = filteredByTitle;
+            }
+            else
+            {
+                finalFiltered = filteredByTitle.Where(task => task.Category == selectedCategory).ToList();
+            }
+            FilteredTasks.Clear();
+            foreach(var task in finalFiltered)
+            {
+                FilteredTasks.Add(task);
+            }
+
+        }
     }
 
     public class ToDoItem
     {
         public string Title { get; set; }
         public bool IsDone { get; set; }
+        public DateTime? DueDate { get; set; }
+        public string Category { get; set; }
     }
     public class DoneToTextDecorationConverter : IValueConverter
     {
