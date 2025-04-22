@@ -121,6 +121,18 @@ namespace ToDo_List_2
             }
 
         }
+
+        private void DeleteCompletedBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var remaining = Tasks.Where(task => !task.IsDone).ToList();
+            Tasks.Clear();
+            foreach (var task in remaining)
+            {
+                Tasks.Add(task);
+            }
+            UpdateCounter();
+            ApplyFilter();
+        }
     }
 
     public class ToDoItem
