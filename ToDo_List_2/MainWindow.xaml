@@ -6,8 +6,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:ToDo_List_2"
         mc:Ignorable="d"
-        Title="ToDo_List" Height="450" Width="800">
-    
+        Title="ToDo_List" Icon="Image/apps.627.13510798887304077.23063538-cc5b-48a6-877b-3b83e2722bce.ico" Height="450" Width="800">
     <Window.Resources>
         <local:DoneToTextDecorationConverter x:Key="DoneToTextDecorationConverter"/>
     </Window.Resources>
